@@ -1,0 +1,62 @@
+apply plugin: "c"
+
+model {
+    toolChains {
+        gcc(Gcc) {
+            target("linux64") {}
+        }
+        clang(Clang) {
+            target("macosx") {}
+        }
+    }
+    buildTypes {
+        release
+        debug
+    }
+    platforms {
+        linux64 {
+            operatingSystem "linux"
+            architecture "amd64"
+        }
+        windows {
+            architecture "amd64"
+        }
+        macosx {
+            architecture "amd64"
+        }
+        esp32 {
+            architecture "arm"
+        }
+    }
+    
+    components {
+        libnpnt(NativeLibrarySpec) {
+            targetPlatform "linux64"
+            targetPlatform "windows"
+            targetPlatform "macosx"
+            targetPlatform "esp32"
+            sources {
+                c {
+                    source {
+                        srcDir "src"
+                        include "**/*.c"
+                    }
+                    exportedHeaders {
+                        srcDirs "inc"
+                    }
+                }
+            }
+        }
+    }
+    binaries {
+        all {
+            cCompiler.define 'RFM_USE_WOLFSSL'
+        }
+        withType(NativeLibraryBinarySpec) {
+            if (targetPlatform.operatingSystem.linux || targetPlatform.operatingSystem.macOsX) {
+                linker.args '-lwolfssl' 
+                linker.args '-lmxml'
+            }
+        }
+    }
+}

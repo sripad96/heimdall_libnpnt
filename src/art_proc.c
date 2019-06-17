@@ -6,7 +6,7 @@
 
 #include <npnt_internal.h>
 #include <npnt.h>
-#include <mxml/mxml.h>
+#include <mxml.h>
 
 /**
  * @brief   Sets Current Permission Artifact.

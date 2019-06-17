@@ -1,10 +1,10 @@
 #include <npnt.h>
 
 #ifdef RFM_USE_WOLFSSL
-#include <wolfssl/openssl/bio.h>
-#include <wolfssl/openssl/err.h>
-#include <wolfssl/openssl/ec.h>
-#include <wolfssl/openssl/pem.h>
+// #include <wolfssl/openssl/bio.h>
+// #include <wolfssl/openssl/err.h>
+// #include <wolfssl/openssl/ec.h>
+// #include <wolfssl/openssl/pem.h>
 #else
 #include <openssl/bio.h>
 #include <openssl/err.h>
@@ -12,30 +12,14 @@
 #include <openssl/pem.h>
 #endif
 
-static SHA_CTX sha;
-
-void reset_sha1()
-{
-    SHA1_Init(&sha);
-}
-
-void update_sha1(const char* data, uint16_t data_len)
-{
-    SHA1_Update(&sha, data, data_len);
-}
-
-void final_sha1(char* hash)
-{
-    SHA1_Final((unsigned char*)hash, &sha);
-}
-
-
 #ifdef RFM_USE_WOLFSSL
 #include <wolfssl/options.h>
 #include <wolfssl/wolfcrypt/rsa.h>
+#include <wolfssl/wolfcrypt/asn.h>
+static DerBuffer converted;
 static RsaKey         rsaKey;
 static RsaKey*        pRsaKey = NULL;
-int8_t npnt_check_authenticity(npnt_s *handle, uint8_t* raw_data, uint16_t raw_data_len, uint8_t* signature, uint16_t signature_len)
+int8_t npnt_check_authenticity(npnt_s *handle, uint8_t* raw_data, uint16_t raw_data_len, const uint8_t* signature, uint16_t signature_len)
 {
     int ret = 0;
 
@@ -96,10 +80,42 @@ int8_t npnt_check_authenticity(npnt_s *handle, uint8_t* raw_data, uint16_t raw_d
 
     return ret;
 }
+static Sha sha;
+
+void reset_sha1()
+{
+    wc_InitSha256(&sha);
+}
+
+void update_sha1(const char* data, uint16_t data_len)
+{
+    wc_Sha256Update(&sha, data, data_len);
+}
+
+void final_sha1(char* hash)
+{
+    wc_Sha256Final(&sha, (unsigned char*)hash);
+}
 #else
+static SHA_CTX sha;
+
+void reset_sha1()
+{
+    SHA1_Init(&sha);
+}
+
+void update_sha1(const char* data, uint16_t data_len)
+{
+    SHA1_Update(&sha, data, data_len);
+}
+
+void final_sha1(char* hash)
+{
+    SHA1_Final((unsigned char*)hash, &sha);
+}
 static EVP_PKEY *dgca_pkey = NULL;
 static EVP_PKEY_CTX *dgca_pkey_ctx;
-int8_t npnt_check_authenticity(npnt_s *handle, uint8_t* raw_data, uint16_t raw_data_len, const uint8_t* signature, uint16_t signature_len)
+int8_t npnt_check_authenticity(npnt_s *handle, uint8_t* hashed_data, uint16_t hashed_data_len, const uint8_t* signature, uint16_t signature_len)
 {
     if (!handle || !raw_data || !signature) {
         return -1;

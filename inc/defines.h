@@ -19,7 +19,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include <mxml/mxml.h>
+#include <mxml.h>
 
 
 #ifdef __cplusplus
