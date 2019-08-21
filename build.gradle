@@ -4,6 +4,7 @@ model {
     toolChains {
         gcc(Gcc) {
             target("linux64") {}
+            target("linux32") {}
         }
         clang(Clang) {
             target("macosx") {}
@@ -14,6 +15,10 @@ model {
         debug
     }
     platforms {
+        linux32 {
+            operatingSystem "linux"
+            architecture "x86"
+        }
         linux64 {
             operatingSystem "linux"
             architecture "amd64"
@@ -32,6 +37,7 @@ model {
     components {
         libnpnt(NativeLibrarySpec) {
             targetPlatform "linux64"
+            targetPlatform "linux32"
             targetPlatform "windows"
             targetPlatform "macosx"
             targetPlatform "esp32"
