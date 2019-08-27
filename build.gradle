@@ -57,6 +57,7 @@ model {
     binaries {
         all {
             cCompiler.define 'RFM_USE_WOLFSSL'
+            cCompiler.args '-fPIC'
         }
         withType(NativeLibraryBinarySpec) {
             if (targetPlatform.operatingSystem.linux || targetPlatform.operatingSystem.macOsX) {
