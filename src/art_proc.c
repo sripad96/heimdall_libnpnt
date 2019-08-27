@@ -65,12 +65,15 @@ int8_t npnt_set_permart(npnt_s *handle, uint8_t *permart, uint16_t permart_lengt
     }
 
     //Collect Fence points from verified artefact
-    ret = npnt_alloc_and_get_fence_points(handle, handle->fence.vertlat, handle->fence.vertlon);
+    ret = npnt_alloc_and_get_fence_points(handle, &handle->fence.vertlat, &handle->fence.vertlon);
     if (ret <= 0) {
+        
         handle->fence.nverts = 0;
         return NPNT_BAD_FENCE;
     }
+
     handle->fence.nverts = ret;
+
     ret = 0;
 
     //Get Max Altitude
@@ -81,11 +84,11 @@ int8_t npnt_set_permart(npnt_s *handle, uint8_t *permart, uint16_t permart_lengt
 
     //Set Flight Params from artefact
     ret = npnt_populate_flight_params(handle);
-    // if (ret < 0) {
-    //     handle->fence.nverts = 0;
-    //     printf("fence error\n");
-    //     return NPNT_INV_FPARAMS;
-    // }
+    if (ret < 0) {
+        handle->fence.nverts = 0;
+      
+        return NPNT_INV_FPARAMS;
+    }
     ret = 0;
     return ret;
 }
@@ -173,13 +176,13 @@ int8_t npnt_verify_permart(npnt_s *handle)
     //Digest Canonicalised Permission Artifact
     raw_perm_without_sign = strstr(handle->raw_permart, "<UAPermission");
     if (raw_perm_without_sign == NULL) {
-        printf("ua fails\n");
+       
         ret = NPNT_INV_ART;
         goto fail;
     }
     permission_length = strstr(handle->raw_permart, "<Signature") - raw_perm_without_sign;
     if (permission_length < 0) {
-        printf("sig fail\n");
+       
         ret = NPNT_INV_ART;
         goto fail;
     }
@@ -251,7 +254,7 @@ fail:
     return ret;
 }
 
-int8_t npnt_alloc_and_get_fence_points(npnt_s* handle, float* vertlat, float* vertlon)
+int8_t npnt_alloc_and_get_fence_points(npnt_s* handle, float** vertlat, float** vertlon)
 {
     //Calculate number of vertices
     mxml_node_t *first_coordinate, *current_coordinate;
@@ -274,10 +277,11 @@ int8_t npnt_alloc_and_get_fence_points(npnt_s* handle, float* vertlat, float* ve
     }
 
     //Allocate vertices
-    vertlat = (float*)malloc(nverts*sizeof(float));
-    vertlon = (float*)malloc(nverts*sizeof(float));
+    *vertlat = (float*)malloc(nverts*sizeof(float));
+    *vertlon = (float*)malloc(nverts*sizeof(float));
 
     if (!vertlat || !vertlon) {
+        
         return -1;
     }
     //read coordinates
@@ -294,22 +298,28 @@ int8_t npnt_alloc_and_get_fence_points(npnt_s* handle, float* vertlat, float* ve
         }
         lat_str = mxmlElementGetAttr(current_coordinate, "latitude");
         if (lat_str) {
-            vertlat[nverts] = atof(lat_str);
+            (*vertlat)[nverts] = atof(lat_str);
         } else {
             goto fail;
         }
         lon_str = mxmlElementGetAttr(current_coordinate, "longitude");
         if (lon_str) {
-            vertlon[nverts] = atof(lon_str);
+            (*vertlon)[nverts] = atof(lon_str);
         } else {
             goto fail;
         }
-        // printf("\n%s %.20f %.20f\n", mxmlGetElement(current_coordinate), vertlat[nverts], vertlon[nverts]);
+        // printf("\n%s %.20f %.20f\n", mxmlGetElement(current_coordinate), (*vertlat)[nverts], (*vertlon)[nverts]);
         current_coordinate = mxmlGetNextSibling(current_coordinate);
         nverts++;
+   
+    
+    
     }
+  
     return nverts;
+    
 fail:
+
     free(vertlat);
     free(vertlon);
     return -1;
@@ -339,10 +349,13 @@ int8_t npnt_get_max_altitude(npnt_s* handle, float* altitude)
 int8_t npnt_ist_date_time_to_unix_time(const char* dt_string, struct tm* date_time)
 {
     char data[5] = {};
-    if (strlen(dt_string) != 19) {
-        return -1;
-    }
+    // if (strlen(dt_string) != 19) {
+    //     printf("date string length %d\n" , strlen(dt_string));
+    //     printf("date string length error\n");
+    //     return -1;
+    // }
     if (!date_time) {
+  
         return -1;
     }
     memset(date_time, 0, sizeof(struct tm));
@@ -350,7 +363,7 @@ int8_t npnt_ist_date_time_to_unix_time(const char* dt_string, struct tm* date_ti
     //read year
     memcpy(data, dt_string, 4);
     data[4] = '\0';
-    date_time->tm_year = atoi(data) - 1900;
+    date_time->tm_year = atoi(data) ;
     //read month
     memcpy(data, &dt_string[5], 2);
     data[2] = '\0';
@@ -362,19 +375,23 @@ int8_t npnt_ist_date_time_to_unix_time(const char* dt_string, struct tm* date_ti
     //read hour
     memcpy(data, &dt_string[11], 2);
     data[2] = '\0';
-    date_time->tm_hour = atoi(data) - 5; //also apply IST to UTC offset
+    date_time->tm_hour = atoi(data) ; //also apply IST to UTC offset
     //read minute
     memcpy(data, &dt_string[14], 2); //also apply IST to UTC offset
     data[2] = '\0';
-    date_time->tm_min = atoi(data) - 30;
+    date_time->tm_min = atoi(data) ;
     //read second
     memcpy(data, &dt_string[17], 2);
     data[2] = '\0';
     date_time->tm_sec = atoi(data);
+    date_time->tm_year -= 1900;
+    date_time->tm_mon -= 1;
+   
+    time_t tim = mktime(date_time);
+    // printf("\nUnixTime: %s\n", ctime(&tim));
 
     return 0;
-    // time_t tim = mktime(date_time);
-    // printf("\nUnixTime: %s\n", ctime(&tim));
+
 }
 
 char* npnt_get_attr(mxml_node_t *node, const char* attr)
@@ -398,18 +415,17 @@ int8_t npnt_populate_flight_params(npnt_s* handle)
     mxml_node_t *ua_detail, *flight_params;
     ua_detail = mxmlFindElement(handle->parsed_permart, handle->parsed_permart, "UADetails", NULL, NULL, MXML_DESCEND);
     if (!ua_detail) {
-        printf("ua fail\n");
+      
         return NPNT_INV_FPARAMS;
     }
     flight_params = mxmlFindElement(handle->parsed_permart, handle->parsed_permart, "FlightParameters", NULL, NULL, MXML_DESCEND);
     if (!flight_params) {
-        printf("flight param fail\n");
-        return NPNT_INV_FPARAMS;
+              return NPNT_INV_FPARAMS;
     }
 
     handle->params.uinNo = npnt_get_attr(ua_detail, "uinNo");
     if (!handle->params.uinNo) {
-        printf("uin fail\n");
+      
         return NPNT_INV_FPARAMS;
     }
 
@@ -425,9 +441,11 @@ int8_t npnt_populate_flight_params(npnt_s* handle)
     //     return NPNT_INV_FPARAMS;
     // }
     if (npnt_ist_date_time_to_unix_time(mxmlElementGetAttr(flight_params, "flightEndTime"), &handle->params.flightEndTime) < 0) {
+       ;
         return NPNT_INV_FPARAMS;
     }
     if (npnt_ist_date_time_to_unix_time(mxmlElementGetAttr(flight_params, "flightStartTime"), &handle->params.flightStartTime) < 0) {
+       
         return NPNT_INV_FPARAMS;
     }
     return 0;

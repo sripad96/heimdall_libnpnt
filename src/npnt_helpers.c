@@ -21,7 +21,7 @@ static RsaKey         rsaKey;
 static RsaKey*        pRsaKey = NULL;
 int8_t npnt_check_authenticity(npnt_s *handle, uint8_t* raw_data, uint16_t raw_data_len, const uint8_t* signature, uint16_t signature_len)
 {
-        printf("wolfssl called");
+       
     int ret = 0;
 
     if (pRsaKey == NULL) {
@@ -35,12 +35,12 @@ int8_t npnt_check_authenticity(npnt_s *handle, uint8_t* raw_data, uint16_t raw_d
         uint32_t sz = ftell(fp);
         rewind(fp);
         if (sz == 0) {
-            printf("size error");
+            
             return -1;
         }
         uint8_t *filebuf = (uint8_t*)malloc(sz);
         if (filebuf == NULL) {
-            printf("filebuff error\n");
+            
             return -1;
         }
         uint32_t idx = 0;
@@ -51,22 +51,22 @@ int8_t npnt_check_authenticity(npnt_s *handle, uint8_t* raw_data, uint16_t raw_d
 
         if (ret == 0) {
             ret = wc_InitRsaKey(&rsaKey, 0);
-            printf("Tried init. rsa key\n");
+            
         }
         if (ret == 0) {
             ret = wc_RsaPublicKeyDecode(converted->buffer, &idx, &rsaKey, converted->length);
-            printf("Tried decode. rsa key\n");
+            
         }
         if (ret == 0) {
             pRsaKey = &rsaKey;
-            printf("Tried pointing rsa key\n");
+            
         }
         free(filebuf);
         close(fp);
     }
 
     if (ret < 0) {
-            printf("ret error\n");
+            
         return -1;
     }
     uint8_t* decSig = NULL;
@@ -78,7 +78,7 @@ int8_t npnt_check_authenticity(npnt_s *handle, uint8_t* raw_data, uint16_t raw_d
         if ((int)decSigLen < 0) {
             
             ret = (int)decSigLen;
-            printf("decSigLen error  %d\n", ret);
+            
         }
     }
     uint8_t enchash[64];
@@ -87,16 +87,16 @@ int8_t npnt_check_authenticity(npnt_s *handle, uint8_t* raw_data, uint16_t raw_d
     /* Check the decrypted result matches the encoded digest. */
     if (ret == 0 && decSigLen != raw_data_len)
     {
-        printf("sig len: %d\n " , signature_len );
-        printf("data length error %d  %d\n", decSigLen , raw_data_len); 
+        // printf("sig len: %d\n " , signature_len );
+        // printf("data length error %d  %d\n", decSigLen , raw_data_len); 
         ret = -1;
     }
     if (ret == 0 && XMEMCMP(enchash, decSig, decSigLen) != 0)
     {
         ret = -1;
-        printf("loop complete  %d\n",ret);
+        
     }
-    printf("finifhed  %d\n",ret);
+    
     return ret;
 }
 static Sha sha;
