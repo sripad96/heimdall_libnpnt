@@ -5,6 +5,7 @@ model {
         gcc(Gcc) {
             target("linux64") {}
             target("linux32") {}
+            target("raspberrypi") {}
         }
         clang(Clang) {
             target("macosx") {}
@@ -32,6 +33,10 @@ model {
         esp32 {
             architecture "arm"
         }
+        raspberrypi {
+            operatingSystem "linux"
+            architecture "arm"
+        }
     }
     
     components {
@@ -41,6 +46,7 @@ model {
             targetPlatform "windows"
             targetPlatform "macosx"
             targetPlatform "esp32"
+            targetPlatform "raspberrypi"
             sources {
                 c {
                     source {
