@@ -25,29 +25,29 @@ int8_t npnt_check_authenticity(npnt_s *handle, uint8_t* raw_data, uint16_t raw_d
     int ret = 0;
 
     if (pRsaKey == NULL) {
-        /* Initialize the RSA key and decode the DER encoded public key. */
-        FILE *fp = fopen("dgca_pubkey.pem", "r");
-        if (fp == NULL) {
-            printf("pub key read fail");
-            return -1;
-        }
-        fseek(fp, 0L, SEEK_END);
-        uint32_t sz = ftell(fp);
-        rewind(fp);
-        if (sz == 0) {
+        // /* Initialize the RSA key and decode the DER encoded public key. */
+        // FILE *fp = fopen("dgca_pubkey.pem", "r");
+        // if (fp == NULL) {
+        //     printf("pub key read fail");
+        //     return -1;
+        // }
+        // fseek(fp, 0L, SEEK_END);
+        // uint32_t sz = ftell(fp);
+        // rewind(fp);
+        // if (sz == 0) {
             
-            return -1;
-        }
-        uint8_t *filebuf = (uint8_t*)malloc(sz);
-        if (filebuf == NULL) {
+        //     return -1;
+        // }
+        // uint8_t *filebuf = (uint8_t*)malloc(sz);
+        // if (filebuf == NULL) {
             
-            return -1;
-        }
+        //     return -1;
+        // }
         uint32_t idx = 0;
         DerBuffer* converted = NULL;
 
-        fread(filebuf, 1, sz, fp);
-        ret = wc_PemToDer(filebuf, sz, PUBLICKEY_TYPE, &converted, 0, NULL, NULL);
+        // fread(filebuf, 1, sz, fp);
+        ret = wc_PemToDer(handle->dgca_pubkey_pem, handle->dgca_pubkey_pem_len, PUBLICKEY_TYPE, &converted, 0, NULL, NULL);
 
         if (ret == 0) {
             ret = wc_InitRsaKey(&rsaKey, 0);
@@ -61,8 +61,8 @@ int8_t npnt_check_authenticity(npnt_s *handle, uint8_t* raw_data, uint16_t raw_d
             pRsaKey = &rsaKey;
             
         }
-        free(filebuf);
-        close(fp);
+        // free(filebuf);
+        // close(fp);
     }
 
     if (ret < 0) {
@@ -114,6 +114,11 @@ void update_sha1(const char* data, uint16_t data_len)
 void final_sha1(char* hash)
 {
     wc_Sha256Final(&sha, (unsigned char*)hash);
+}
+
+void npnt_set_dgca_pubkey(npnt_s *handle, char* dgca_pub_key, uint32_t length){
+    handle->dgca_pubkey_pem = dgca_pub_key;
+    handle->dgca_pubkey_pem_len = length;
 }
 #else
 static SHA_CTX sha;

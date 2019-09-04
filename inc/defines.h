@@ -28,6 +28,8 @@ extern "C"
 #endif
 
 typedef struct {
+    char *dgca_pubkey_pem;
+    uint32_t dgca_pubkey_pem_len;
     char *raw_permart;
     uint16_t raw_permart_len;
     void*   security_handle;
