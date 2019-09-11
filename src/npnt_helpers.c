@@ -19,9 +19,14 @@
 static DerBuffer converted;
 static RsaKey         rsaKey;
 static RsaKey*        pRsaKey = NULL;
+
+
+void prnarray(uint8_t *arr, int len) {
+    for(int i=0;i<len;i++) printf("%02x", arr[i]);
+    printf("\n");
+}
 int8_t npnt_check_authenticity(npnt_s *handle, uint8_t* raw_data, uint16_t raw_data_len, const uint8_t* signature, uint16_t signature_len)
 {
-       
     int ret = 0;
 
     if (pRsaKey == NULL) {
@@ -92,11 +97,11 @@ int8_t npnt_check_authenticity(npnt_s *handle, uint8_t* raw_data, uint16_t raw_d
         ret = -1;
     }
     if (ret == 0 && XMEMCMP(enchash, decSig, decSigLen) != 0)
-    {
+    {   
+        // prnarray(enchash, raw_data_len);
+        // prnarray(decSig, decSigLen);
         ret = -1;
-        
     }
-    
     return ret;
 }
 static Sha sha;
