@@ -51,7 +51,6 @@ int8_t npnt_set_permart(npnt_s *handle, uint8_t *permart, uint16_t permart_lengt
         }
         memcpy(handle->raw_permart, permart, permart_length);
     }
-
     //parse XML permart
     handle->parsed_permart = mxmlLoadString(NULL, handle->raw_permart, MXML_OPAQUE_CALLBACK);
     if (!handle->parsed_permart) {
@@ -121,6 +120,7 @@ int8_t npnt_verify_permart(npnt_s *handle)
         ret = NPNT_INV_ART;
         goto fail;
     }
+
     signedinfo_length = strstr(handle->raw_permart, "<SignatureValue") - signed_info;
     if (signedinfo_length < 0) {
         ret = NPNT_INV_ART;
@@ -153,11 +153,15 @@ int8_t npnt_verify_permart(npnt_s *handle)
                 }
             }
         }
-
+        // char ch = (&signed_info[curr_ptr])[curr_length];
+        // (&signed_info[curr_ptr])[curr_length] = 0;
+        // printf("%s", &signed_info[curr_ptr]);
+        // (&signed_info[curr_ptr])[curr_length] = ch;
         update_sha1(&signed_info[curr_ptr], curr_length);
         curr_ptr += curr_length;
     }
     final_sha1(digest_value);
+    // printf("\n");
 
     //fetch SignatureValue from xml
     signature = (const uint8_t*)mxmlGetOpaque(mxmlFindElement(handle->parsed_permart, handle->parsed_permart, "SignatureValue", NULL, NULL, MXML_DESCEND));
@@ -176,13 +180,11 @@ int8_t npnt_verify_permart(npnt_s *handle)
     //Digest Canonicalised Permission Artifact
     raw_perm_without_sign = strstr(handle->raw_permart, "<UAPermission");
     if (raw_perm_without_sign == NULL) {
-       
         ret = NPNT_INV_ART;
         goto fail;
     }
     permission_length = strstr(handle->raw_permart, "<Signature") - raw_perm_without_sign;
     if (permission_length < 0) {
-       
         ret = NPNT_INV_ART;
         goto fail;
     }
