@@ -48,7 +48,6 @@ int8_t npnt_check_authenticity(npnt_s *handle, uint8_t* raw_data, uint16_t raw_d
 
         // fread(filebuf, 1, sz, fp);
         ret = wc_PemToDer(handle->dgca_pubkey_pem, handle->dgca_pubkey_pem_len, PUBLICKEY_TYPE, &converted, 0, NULL, NULL);
-
         if (ret == 0) {
             ret = wc_InitRsaKey(&rsaKey, 0);
             
@@ -76,9 +75,8 @@ int8_t npnt_check_authenticity(npnt_s *handle, uint8_t* raw_data, uint16_t raw_d
         decSigLen = wc_RsaSSL_VerifyInline(signature, signature_len,
                                            &decSig, pRsaKey);
         if ((int)decSigLen < 0) {
-            
             ret = (int)decSigLen;
-            
+            return -1;
         }
     }
     uint8_t enchash[64];

@@ -5,7 +5,11 @@ model {
         gcc(Gcc) {
             target("linux64") {}
             target("linux32") {}
-            target("raspberrypi") {}
+            target("raspberrypi") {
+                cCompiler.executable = "arm-linux-gnueabihf-g++"
+                cppCompiler.executable = "arm-linux-gnueabihf-g++"
+                linker.executable = "arm-linux-gnueabihf-g++"
+            }
         }
         clang(Clang) {
             target("macosx") {}
@@ -69,6 +73,10 @@ model {
             if (targetPlatform.operatingSystem.linux || targetPlatform.operatingSystem.macOsX) {
                 linker.args '-lwolfssl' 
                 linker.args '-lmxml'
+            }
+            if (targetPlatform == platforms.raspberrypi) {
+                cCompiler.args '-I/home/nihal/Code/Skylark/gatekeeper/prebuilt_rasp/include', '-std=c99'
+                linker.args '-L/home/nihal/Code/Skylark/gatekeeper/prebuilt_rasp/lib'
             }
         }
     }

@@ -24,6 +24,8 @@ extern "C"
 void reset_sha1();
 void update_sha1(const char* data, uint16_t data_len);
 void final_sha1(char* hash);
+void npnt_set_dgca_pubkey(npnt_s *handle, char* dgca_pub_key, uint32_t length);
+
 
 #ifdef __cplusplus
 } // extern "C"
