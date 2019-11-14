@@ -10,6 +10,11 @@ model {
                 cppCompiler.executable = "arm-linux-gnueabihf-g++"
                 linker.executable = "arm-linux-gnueabihf-g++"
             }
+            target("esp32") {
+                cCompiler.executable = "xtensa-esp32-elf-g++"
+                cppCompiler.executable = "xtensa-esp32-elf-g++"
+                linker.executable = "xtensa-esp32-elf-g++"
+            }
         }
         clang(Clang) {
             target("macosx") {}
@@ -70,6 +75,42 @@ model {
             cCompiler.args '-fPIC'
         }
         withType(NativeLibraryBinarySpec) {
+            if (targetPlatform == platforms.esp32) {
+                cCompiler.args "-I$System.env.SDKCONFIG_PATH/build/config"
+                cppCompiler.args "-I$System.env.SDKCONFIG_PATH/build/config"
+                cCompiler.args "-I$System.env.IDF_PATH/components/wolfssl"
+                cppCompiler.args "-I$System.env.IDF_PATH/components/wolfssl"
+                cCompiler.args "-I$System.env.IDF_PATH/components/wolfssl/include"
+                cppCompiler.args "-I$System.env.IDF_PATH/components/wolfssl/include"
+                cCompiler.args "-I$System.env.IDF_PATH/components/freertos/include/freertos"
+                cppCompiler.args "-I$System.env.IDF_PATH/components/freertos/include/freertos"
+                cCompiler.args "-I$System.env.IDF_PATH/components/freertos/include"
+                cppCompiler.args "-I$System.env.IDF_PATH/components/freertos/include"
+                cCompiler.args "-I$System.env.IDF_PATH/components/xtensa/include"
+                cppCompiler.args "-I$System.env.IDF_PATH/components/xtensa/include"
+                cCompiler.args "-I$System.env.IDF_PATH/components/soc/esp32/include"
+                cppCompiler.args "-I$System.env.IDF_PATH/components/soc/esp32/include"
+                cCompiler.args "-I$System.env.IDF_PATH/components/esp_rom/include"
+                cppCompiler.args "-I$System.env.IDF_PATH/components/esp_rom/include"
+                cCompiler.args "-I$System.env.IDF_PATH/components/xtensa/esp32/include"
+                cppCompiler.args "-I$System.env.IDF_PATH/components/xtensa/esp32/include"
+                cCompiler.args "-I$System.env.IDF_PATH/components/newlib/include"
+                cppCompiler.args "-I$System.env.IDF_PATH/components/newlib/include"
+                cCompiler.args "-I$System.env.IDF_PATH/components/esp_common/include"
+                cppCompiler.args "-I$System.env.IDF_PATH/components/esp_common/include"
+                cCompiler.args "-I$System.env.IDF_PATH/components/heap/include"
+                cppCompiler.args "-I$System.env.IDF_PATH/components/heap/include"
+                cCompiler.args "-I$System.env.IDF_PATH/components/esp32/include"
+                cppCompiler.args "-I$System.env.IDF_PATH/components/esp32/include"
+                cCompiler.args "-I$System.env.IDF_PATH/components/driver/include"
+                cppCompiler.args "-I$System.env.IDF_PATH/components/driver/include"
+                cCompiler.args "-I$System.env.IDF_PATH/components/log/include"
+                cppCompiler.args "-I$System.env.IDF_PATH/components/log/include"
+                cCompiler.args "-I$System.env.IDF_PATH/components/newlib/platform_include"
+                cppCompiler.args "-I$System.env.IDF_PATH/components/newlib/platform_include"
+                cCompiler.args "-DWOLFSSL_USER_SETTINGS"
+                cppCompiler.args "-DWOLFSSL_USER_SETTINGS"
+            }
             if (targetPlatform.operatingSystem.linux || targetPlatform.operatingSystem.macOsX) {
                 linker.args '-lwolfssl' 
                 linker.args '-lmxml'
