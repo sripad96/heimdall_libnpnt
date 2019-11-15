@@ -110,6 +110,8 @@ model {
                 cppCompiler.args "-I$System.env.IDF_PATH/components/newlib/platform_include"
                 cCompiler.args "-DWOLFSSL_USER_SETTINGS"
                 cppCompiler.args "-DWOLFSSL_USER_SETTINGS"
+                cCompiler.args "-mlongcalls", "-ffunction-sections", "-fdata-sections", "-fstrict-volatile-bitfields", "-ggdb", "-Og",  "-std=gnu++11",  "-fno-exceptions",  "-fno-rtti", "-nostdlib"
+                cppCompiler.args "-mlongcalls", "-ffunction-sections", "-fdata-sections", "-fstrict-volatile-bitfields", "-ggdb", "-Og",  "-std=gnu++11",  "-fno-exceptions",  "-fno-rtti", "-nostdlib"
             }
             if (targetPlatform.operatingSystem.linux || targetPlatform.operatingSystem.macOsX) {
                 linker.args '-lwolfssl' 
