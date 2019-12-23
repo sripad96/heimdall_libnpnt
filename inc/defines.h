@@ -35,9 +35,9 @@ typedef struct {
     void*   security_handle;
     mxml_node_t *parsed_permart;
     struct {
-        float* vertlat;     //degrees
-        float* vertlon;     //degrees
-        float maxAltitude; //meters
+        double* vertlat;     //degrees
+        double* vertlon;     //degrees
+        double maxAltitude; //meters
         uint8_t nverts;
     } fence;
     struct {

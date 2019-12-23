@@ -36,7 +36,9 @@ int8_t npnt_set_permart(npnt_s *handle, uint8_t *permart, uint16_t permart_lengt
     int16_t ret = 0;
     //Extract XML from base64 encoded permart
     if (handle->raw_permart) {
-        return NPNT_ALREADY_SET;
+        free(handle->raw_permart);
+        handle->raw_permart = NULL;
+        //return NPNT_ALREADY_SET;
     }
 
     if (base64_encoded) {
@@ -256,7 +258,7 @@ fail:
     return ret;
 }
 
-int8_t npnt_alloc_and_get_fence_points(npnt_s* handle, float** vertlat, float** vertlon)
+int8_t npnt_alloc_and_get_fence_points(npnt_s* handle, double** vertlat, double** vertlon)
 {
     //Calculate number of vertices
     mxml_node_t *first_coordinate, *current_coordinate;
@@ -279,8 +281,8 @@ int8_t npnt_alloc_and_get_fence_points(npnt_s* handle, float** vertlat, float** 
     }
 
     //Allocate vertices
-    *vertlat = (float*)malloc(nverts*sizeof(float));
-    *vertlon = (float*)malloc(nverts*sizeof(float));
+    *vertlat = (double*)malloc(nverts*sizeof(double));
+    *vertlon = (double*)malloc(nverts*sizeof(double));
 
     if (!vertlat || !vertlon) {
         
